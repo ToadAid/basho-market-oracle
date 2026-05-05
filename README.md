@@ -58,7 +58,7 @@ LIVE_WALLET_TOOLS_ENABLED=false
 LIVE_TRADING_ENABLED=false
 ```
 
-Optional: Trust Wallet Agent Skills / TWAK
+## Optional: Trust Wallet Agent Skills / TWAK
 
 Bashō Market Oracle does not require Trust Wallet Agent Skills / TWAK for market analysis, token risk review, narrative separation, paper trading, or normal proposal-mode usage.
 
