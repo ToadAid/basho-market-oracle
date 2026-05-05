@@ -58,64 +58,67 @@ LIVE_WALLET_TOOLS_ENABLED=false
 LIVE_TRADING_ENABLED=false
 ```
 
-## Optional: Trust Agentic Wallet / TWAK
+Optional: Trust Wallet Agent Skills / TWAK
 
-Bashō Market Oracle does **not** require Trust Agentic Wallet / TWAK for market analysis, token risk review, narrative separation, paper trading, or normal proposal-mode usage.
+Bashō Market Oracle does not require Trust Wallet Agent Skills / TWAK for market analysis, token risk review, narrative separation, paper trading, or normal proposal-mode usage.
 
-Trust Agentic Wallet belongs to the custody/execution layer. Install and pair it only if you intentionally want to experiment with live wallet-aware actions such as transfers or swaps.
+Trust Wallet Agent Skills belong to the wallet-aware custody/execution layer. Install them only if you intentionally want to experiment with Trust Wallet API, wallet operations, swap quotes, transfers, x402 setup, or other wallet-aware actions.
 
 By default, wallet execution remains disabled:
 
-```text
 LIVE_WALLET_TOOLS_ENABLED=false
 LIVE_TRADING_ENABLED=false
 TRUST_WALLET_MARKET_DATA_ENABLED=false
-```
+TRUST_WALLET_SKILLS_ENABLED=false
 
-### Install / pair checklist
+Prerequisites (Free API Access)
 
-Follow the official Trust Agentic Wallet / TWAK installation instructions for your operating system. After installation, make sure the wallet CLI is on your `PATH`. In your local setup, the CLI is expected to be available as:
+Get your free Trust Wallet API credentials from:
+👉 https://portal.trustwallet.com
 
-```bash
-caw status
-```
+Then add them to your local ".env":
 
-A healthy paired wallet should return a status response showing the wallet is paired/active. If `caw` is not found, add the installed wallet CLI directory to your shell path, for example:
+TWAK_ACCESS_ID=your_access_id
+TWAK_HMAC_SECRET=your_hmac_secret
 
-```bash
-export PATH="$HOME/.cobo-agentic-wallet/bin:$PATH"
-```
+Install Trust Wallet Agent Skills
 
-To make that persistent for Bash users:
+Install the official Trust Wallet agent skills package:
 
-```bash
-echo 'export PATH="$HOME/.cobo-agentic-wallet/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
+npx skills add trustwallet/tw-agent-skills
 
-Then verify again:
+To install for a specific coding agent:
 
-```bash
-caw status
-```
+npx skills add trustwallet/tw-agent-skills -a codex
+npx skills add trustwallet/tw-agent-skills -a claude-code
+npx skills add trustwallet/tw-agent-skills -a cursor
+npx skills add trustwallet/tw-agent-skills -a windsurf
 
-### Enabling wallet-aware tools
+Configure Trust Wallet API credentials
 
-Only after the wallet is installed, paired, healthy, and connected to a test wallet, you may enable wallet-aware tools locally in `.env`:
+Ensure your ".env" includes:
 
-```text
+TWAK_ACCESS_ID=your_access_id
+TWAK_HMAC_SECRET=your_hmac_secret
+
+Never commit ".env", API keys, wallet credentials, private keys, or local database files.
+
+Enabling wallet-aware tools
+
+Only after credentials are configured and you are using a fresh test wallet, you may enable wallet-aware tools locally:
+
+TRUST_WALLET_SKILLS_ENABLED=true
 LIVE_WALLET_TOOLS_ENABLED=true
 LIVE_TRADING_ENABLED=true
-```
+TRUST_WALLET_MARKET_DATA_ENABLED=true
 
-Use a fresh test wallet first. Do **not** enable live wallet tools on a wallet holding funds you cannot afford to lose.
+Use a fresh test wallet first. Do not enable live wallet tools on a wallet holding funds you cannot afford to lose.
 
-Important: wallet installation is optional. Market analysis should still work without it.
+Important: Trust Wallet Agent Skills are optional. Market analysis should still work without them.
 
-```text
 No wallet required to see the weather.
 Wallet required only to sail.
-```
+
 
 ## Quick start
 
