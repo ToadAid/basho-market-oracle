@@ -74,7 +74,7 @@ TRUST_WALLET_MARKET_DATA_ENABLED=false
 
 ### Install / pair checklist
 
-Follow the official Trust Agentic Wallet / TWAK installation instructions for your operating system. After installation, make sure the wallet CLI is on your `PATH`. In Tommy's local setup, the CLI is expected to be available as:
+Follow the official Trust Agentic Wallet / TWAK installation instructions for your operating system. After installation, make sure the wallet CLI is on your `PATH`. In your local setup, the CLI is expected to be available as:
 
 ```bash
 caw status
