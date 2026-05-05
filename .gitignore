@@ -1,0 +1,36 @@
+# Secrets and local credentials
+.env
+*.env
+client_secret.json
+*_client_secret*.json
+*.key
+*.pem
+*secret*
+
+# Local/private runtime state
+workspace/*
+!workspace/README.md
+!workspace/.gitignore
+logs/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+releases/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Node / OS / IDE
+node_modules/
+.DS_Store
+.vscode/
+.idea/
