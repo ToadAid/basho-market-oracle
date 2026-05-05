@@ -60,65 +60,82 @@ LIVE_TRADING_ENABLED=false
 
 ## Optional: Trust Wallet Agent Skills / TWAK
 
-Bashō Market Oracle does not require Trust Wallet Agent Skills / TWAK for market analysis, token risk review, narrative separation, paper trading, or normal proposal-mode usage.
+Bashō Market Oracle does **not** require Trust Wallet Agent Skills / TWAK for market analysis, token risk review, narrative separation, paper trading, or normal proposal-mode usage.
 
 Trust Wallet Agent Skills belong to the wallet-aware custody/execution layer. Install them only if you intentionally want to experiment with Trust Wallet API, wallet operations, swap quotes, transfers, x402 setup, or other wallet-aware actions.
 
 By default, wallet execution remains disabled:
 
+```text
 LIVE_WALLET_TOOLS_ENABLED=false
 LIVE_TRADING_ENABLED=false
 TRUST_WALLET_MARKET_DATA_ENABLED=false
 TRUST_WALLET_SKILLS_ENABLED=false
+```
 
-Prerequisites (Free API Access)
+### Prerequisites: free Trust Wallet API access
 
 Get your free Trust Wallet API credentials from:
-👉 https://portal.trustwallet.com
 
-Then add them to your local ".env":
+```text
+https://portal.trustwallet.com
+```
 
+Then add them to your local `.env`:
+
+```text
 TWAK_ACCESS_ID=your_access_id
 TWAK_HMAC_SECRET=your_hmac_secret
+```
 
-Install Trust Wallet Agent Skills
+Never commit `.env`, API keys, wallet credentials, private keys, or local database files.
+
+### Install Trust Wallet Agent Skills
 
 Install the official Trust Wallet agent skills package:
 
+```bash
 npx skills add trustwallet/tw-agent-skills
+```
 
-To install for a specific coding agent:
+This auto-detects your coding agent. To install for a specific coding agent:
 
-npx skills add trustwallet/tw-agent-skills -a codex
+```bash
 npx skills add trustwallet/tw-agent-skills -a claude-code
 npx skills add trustwallet/tw-agent-skills -a cursor
+npx skills add trustwallet/tw-agent-skills -a codex
 npx skills add trustwallet/tw-agent-skills -a windsurf
+npx skills add trustwallet/tw-agent-skills -a github-copilot
+npx skills add trustwallet/tw-agent-skills -a cline
+npx skills add trustwallet/tw-agent-skills -a opencode
+npx skills add trustwallet/tw-agent-skills -a roo
+```
 
-Configure Trust Wallet API credentials
+To install only one Trust Wallet skill:
 
-Ensure your ".env" includes:
+```bash
+npx skills add trustwallet/tw-agent-skills -s api
+```
 
-TWAK_ACCESS_ID=your_access_id
-TWAK_HMAC_SECRET=your_hmac_secret
+### Enabling wallet-aware tools
 
-Never commit ".env", API keys, wallet credentials, private keys, or local database files.
+Only after Trust Wallet API credentials are configured and you are using a fresh test wallet, you may enable wallet-aware tools locally in `.env`:
 
-Enabling wallet-aware tools
-
-Only after credentials are configured and you are using a fresh test wallet, you may enable wallet-aware tools locally:
-
+```text
 TRUST_WALLET_SKILLS_ENABLED=true
 LIVE_WALLET_TOOLS_ENABLED=true
 LIVE_TRADING_ENABLED=true
 TRUST_WALLET_MARKET_DATA_ENABLED=true
+```
 
-Use a fresh test wallet first. Do not enable live wallet tools on a wallet holding funds you cannot afford to lose.
+Use a fresh test wallet first. Do **not** enable live wallet tools on a wallet holding funds you cannot afford to lose.
 
 Important: Trust Wallet Agent Skills are optional. Market analysis should still work without them.
 
+```text
 No wallet required to see the weather.
 Wallet required only to sail.
-
+```
 
 ## Quick start
 
