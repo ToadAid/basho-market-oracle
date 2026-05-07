@@ -33,6 +33,12 @@ class TestTelegramBot(unittest.IsolatedAsyncioTestCase):
         self.assertIn("👛 Wallet", buttons)
         self.assertIn("🔮 Forge", buttons)
 
+    def test_telegram_bot_commands(self):
+        commands = self.bot._telegram_bot_commands()
+        command_names = [command.command for command in commands]
+
+        self.assertEqual(command_names, ["start", "menu"])
+
     def test_forge_target_parser_symbol_and_contract(self):
         symbol_target = self.bot._parse_forge_target("ETH ethereum 1h composite")
         contract_target = self.bot._parse_forge_target("0xabc base 1h,24h composite,risk")
@@ -95,7 +101,7 @@ class TestTelegramBot(unittest.IsolatedAsyncioTestCase):
 
         self.bot._get_agent.assert_not_called()
         update.message.reply_text.assert_awaited_once()
-        self.assertIn("Voice context restored", update.message.reply_text.call_args.args[0])
+        self.assertIn("workspace/tobyworld_master_archive.md", update.message.reply_text.call_args.args[0])
 
     async def test_wake_check_bypasses_agent(self):
         update = MagicMock(spec=Update)
@@ -244,6 +250,20 @@ class TestTelegramBot(unittest.IsolatedAsyncioTestCase):
         args, kwargs = update.message.reply_text.call_args
         self.assertIn("AI Crypto Trading Bot", args[0])
         self.assertIsNotNone(kwargs.get("reply_markup"))
+        self.assertEqual(kwargs.get("parse_mode"), "MarkdownV2")
+
+    async def test_handle_menu(self):
+        update = MagicMock(spec=Update)
+        update.message = AsyncMock(spec=Message)
+        context = MagicMock(spec=ContextTypes.DEFAULT_TYPE)
+
+        await self.bot._handle_menu(update, context)
+
+        update.message.reply_text.assert_called_once()
+        args, kwargs = update.message.reply_text.call_args
+        self.assertIn("Main menu", args[0])
+        self.assertIsNotNone(kwargs.get("reply_markup"))
+        self.assertEqual(kwargs.get("parse_mode"), "MarkdownV2")
 
     @patch("core.telegram_bot.TelegramBot._call_api", new_callable=AsyncMock)
     async def test_process_quick_trade_buy(self, mock_call_api):

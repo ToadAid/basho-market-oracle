@@ -19,7 +19,7 @@ from datetime import datetime
 
 import telegram
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler, ApplicationHandlerStop
 
 from core.agent import Agent
@@ -346,15 +346,34 @@ class TelegramBot:
         ]
         return InlineKeyboardMarkup(keyboard)
 
+    def _telegram_bot_commands(self) -> list[BotCommand]:
+        return [
+            BotCommand("start", "Open the bot and show the main menu"),
+            BotCommand("menu", "Show the main menu"),
+        ]
+
     async def _handle_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle /start command."""
         welcome_text = (
-            "🤖 **AI Crypto Trading Bot**\n\n"
-            "Welcome! I am your AI assistant for crypto trading. "
-            "You can talk to me directly to ask about prices, trends, or to execute trades, "
-            "or use the menu below for quick actions."
+            "AI Crypto Trading Bot\n\n"
+            "Welcome. Ask about prices, trends, portfolio status, or trade ideas.\n"
+            "Use the menu below for quick actions."
         )
-        await update.message.reply_text(welcome_text, reply_markup=self._get_main_menu(), parse_mode="MarkdownV2", disable_web_page_preview=True)
+        await update.message.reply_text(
+            self._prepare_telegram_response(welcome_text),
+            reply_markup=self._get_main_menu(),
+            parse_mode="MarkdownV2",
+            disable_web_page_preview=True,
+        )
+
+    async def _handle_menu(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Handle /menu command."""
+        await update.message.reply_text(
+            self._prepare_telegram_response("Main menu"),
+            reply_markup=self._get_main_menu(),
+            parse_mode="MarkdownV2",
+            disable_web_page_preview=True,
+        )
 
     async def _handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Handle incoming text messages (pass to AI Agent)."""
@@ -468,7 +487,16 @@ class TelegramBot:
         
         result_holder = [""]
         error_holder = [""]
-        agent = self._get_agent(chat_id)
+        try:
+            agent = self._get_agent(chat_id)
+        except Exception as e:  # noqa: BLE001
+            if status_message is not None:
+                try:
+                    await status_message.delete()
+                except Exception:
+                    pass
+            await update.message.reply_text(f"❌ AI Error: {e}")
+            return
 
         def run_agent():
             try:
@@ -1150,23 +1178,24 @@ class TelegramBot:
 
     def _format_message(self, title: str, data: dict) -> str:
         """Format a message with a title and a dictionary of data."""
-        message = f"**{title}**\n\n"
+        message = f"{title}\n\n"
         for key, value in data.items():
             if isinstance(value, float):
                 value = f"{value:,.2f}"
             elif isinstance(value, int):
                 value = f"{value:,}"
-            message += f"**{key}:**\t\t`{value}`\n"
+            message += f"{key}: {value}\n"
         return message
 
     async def _show_result(self, query, title: str, result: dict, back_callback: str) -> None:
         kb = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data=back_callback)]])
-        text = self._format_message(title, result)
+        text = self._prepare_telegram_response(self._format_message(title, result))
         if len(text) <= 4090:
             await query.edit_message_text(text, reply_markup=kb, parse_mode="MarkdownV2", disable_web_page_preview=True)
             return
 
-        await query.edit_message_text(text[:3900] + "\n\n[truncated]", reply_markup=kb, parse_mode="MarkdownV2", disable_web_page_preview=True)
+        truncated = self._prepare_telegram_response(f"{self._format_message(title, result)[:3900]}\n\n[truncated]")
+        await query.edit_message_text(truncated, reply_markup=kb, parse_mode="MarkdownV2", disable_web_page_preview=True)
         for i in range(3900, len(text), 4090):
             await query.message.reply_text(text[i:i+4090], parse_mode="MarkdownV2", disable_web_page_preview=True)
 
@@ -1722,8 +1751,9 @@ class TelegramBot:
             sys.exit(1)
 
         try:
-            app = Application.builder().token(self.token).build()
+            app = Application.builder().token(self.token).post_init(self._post_init).build()
             app.add_handler(CommandHandler("start", self._handle_start))
+            app.add_handler(CommandHandler("menu", self._handle_menu))
             app.add_handler(CallbackQueryHandler(self._handle_callback))
             app.add_handler(MessageHandler((filters.PHOTO | filters.Document.IMAGE) & ~filters.COMMAND, self._handle_image_message))
             app.add_handler(MessageHandler(filters.ATTACHMENT & ~filters.COMMAND, self._handle_unsupported_media))
@@ -1732,6 +1762,13 @@ class TelegramBot:
             app.run_polling(drop_pending_updates=True)
         finally:
             lock.release()
+
+    async def _post_init(self, app: Application) -> None:
+        """Register slash commands shown in Telegram's command menu."""
+        try:
+            await app.bot.set_my_commands(self._telegram_bot_commands())
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Failed to register Telegram bot commands: %s", exc)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
